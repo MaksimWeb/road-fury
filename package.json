@@ -4,7 +4,7 @@
   "description": "My Own Road Map to SSR",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./server/index.js & webpack --watch",
+    "start": "nodemon ./server/index.js & webpack --watch --env mode=development",
     "test": "echo \"Error: no test specified\" && exit 1",
     "webpack": "webpack",
     "watch": "webpack --watch"

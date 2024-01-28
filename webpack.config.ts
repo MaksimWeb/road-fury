@@ -6,7 +6,7 @@ export default (env: {
   mode: 'production' | 'development';
   port: number;
 }): webpack.Configuration => ({
-  mode: 'production',
+  mode: env.mode,
   entry: path.resolve(__dirname, 'src', 'index.tsx'),
 
   output: {
