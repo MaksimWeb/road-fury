@@ -1,8 +1,12 @@
 import webpack from 'webpack';
 import path from 'path';
+import HTMLWebpackPlugin from 'html-webpack-plugin';
 
-export default (env: { mode: 'production' | 'development'; port: number }) => ({
-  mode: 'development',
+export default (env: {
+  mode: 'production' | 'development';
+  port: number;
+}): webpack.Configuration => ({
+  mode: 'production',
   entry: path.resolve(__dirname, 'src', 'index.tsx'),
 
   output: {
@@ -11,11 +15,18 @@ export default (env: { mode: 'production' | 'development'; port: number }) => ({
     clean: true,
   },
 
+  plugins: [
+    new HTMLWebpackPlugin({
+      template: path.resolve(__dirname, 'public', 'index.html'),
+    }),
+  ],
+
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        loader: 'ts-loader',
+        exclude: '/node_modules',
+        use: ['babel-loader'],
       },
     ],
   },
@@ -29,11 +40,5 @@ export default (env: { mode: 'production' | 'development'; port: number }) => ({
     },
   },
 
-  devServer: {
-    static: {
-      directory: path.join(__dirname, 'build'),
-    },
-    compress: true,
-    port: 4000,
-  },
+  devtool: 'inline-source-map',
 });
