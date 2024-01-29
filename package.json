@@ -4,7 +4,7 @@
   "description": "My Own Road Map to SSR",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./server/index.js & webpack --watch --env mode=development",
+    "start": "nodemon --delay 500ms ./server/index.js & webpack --watch --env mode=development",
     "test": "echo \"Error: no test specified\" && exit 1",
     "webpack": "webpack",
     "watch": "webpack --watch"
@@ -35,6 +35,7 @@
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "babel-loader": "^9.1.3",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "nodemon": "^3.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
