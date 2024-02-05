@@ -26,6 +26,9 @@ export default (env: {
     filename: '[name].bundle.js',
     clean: true,
     globalObject: 'this',
+    library: {
+      type: 'commonjs-static',
+    },
   },
 
   plugins: [].concat(

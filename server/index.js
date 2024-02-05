@@ -1,3 +1,5 @@
+const { renderToString } = require('react-dom/server');
+
 const express = require('express');
 const app = express();
 
@@ -17,23 +19,23 @@ myPages.forEach(async (page) => {
     path.resolve(__dirname, '..', 'build', `${pageRouteName}.html`),
     'utf-8'
   );
-  const pageScript = fs.readFileSync(
-    path.resolve(__dirname, '..', 'build', `${pageRouteName}.bundle.js`)
-  );
+  // const pageScript = fs.readFileSync(
+  //   path.resolve(__dirname, '..', 'build', `${pageRouteName}.bundle.js`)
+  // );
 
-  const pageFunction = import('../build/about.bundle.js').then((mod) => {
-    console.log(mod);
-  });
+  const Component = (
+    await import(path.resolve(`./build/${pageRouteName}.bundle.js`))
+  ).default.default;
 
   const pageRoute = pageRouteName === 'index' ? '/' : `/${pageRouteName}`;
 
   app.get(pageRoute, (req, res) => {
-    res.send(pageHtml);
+    res.send(pageHtml.replace('<!--mycode-->', renderToString(Component())));
   });
 
-  app.get(scriptPathRegexp, (req, res) => {
-    res.send(pageScript);
-  });
+  // app.get(scriptPathRegexp, (req, res) => {
+  //   res.send(pageScript);
+  // });
 });
 
 app.listen(4001, () => {
