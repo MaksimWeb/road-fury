@@ -3,9 +3,7 @@ import path from 'path';
 import HTMLWebpackPlugin from 'html-webpack-plugin';
 import fs from 'fs';
 
-const pages = fs
-  .readdirSync(path.resolve(__dirname, 'src'))
-  .filter((pageName) => pageName !== 'index.tsx');
+const pages = fs.readdirSync(path.resolve('./src/pages'));
 
 export default (env: {
   mode: 'production' | 'development';
@@ -14,15 +12,13 @@ export default (env: {
   mode: env.mode,
   entry: pages.reduce((config, pageName) => {
     config[pageName.replace('.tsx', '')] = path.resolve(
-      __dirname,
-      'src',
-      pageName
+      `./src/pages/${pageName}`
     );
 
     return config;
   }, {} as any),
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve('./build'),
     filename: '[name].bundle.js',
     clean: true,
     globalObject: 'this',
@@ -31,17 +27,12 @@ export default (env: {
     },
   },
 
-  plugins: [].concat(
-    pages.map(
-      (page) =>
-        new HTMLWebpackPlugin({
-          inject: true,
-          template: path.resolve(__dirname, 'public', 'index.html'),
-          filename: `${page.replace('.tsx', '')}.html`,
-          chunks: [page.replace('.tsx', '')],
-        })
-    )
-  ),
+  plugins: [
+    new HTMLWebpackPlugin({
+      template: path.resolve('./public/index.html'),
+      inject: false,
+    }),
+  ],
 
   module: {
     rules: [

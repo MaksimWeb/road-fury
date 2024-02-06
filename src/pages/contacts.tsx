@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function App() {
+export default function Contacts() {
   return (
     <div>
       <h1 style={{ color: 'green' }}>You are the best my friend</h1>
