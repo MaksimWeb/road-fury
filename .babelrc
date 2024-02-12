@@ -1,4 +1,26 @@
 {
-  "plugins": ["transform-es2015-modules-commonjs"],
-  "presets": ["@babel/env", "@babel/react", "@babel/preset-typescript"]
+  "presets": [
+    [
+      "@babel/preset-react",
+      {
+        "runtime": "automatic"
+      }
+    ],
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "browsers": ["last 2 versions"]
+        },
+        "loose": false,
+        "modules": "commonjs"
+      }
+    ],
+    "@babel/preset-typescript"
+  ],
+  "env": {
+    "test": {
+      "plugins": ["transform-es2015-modules-commonjs"]
+    }
+  }
 }

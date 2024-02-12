@@ -9,30 +9,16 @@ export default (env: {
   mode: 'production' | 'development';
   port: number;
 }): webpack.Configuration => ({
+  target: 'web',
   mode: env.mode,
-  entry: pages.reduce((config, pageName) => {
-    config[pageName.replace('.tsx', '')] = path.resolve(
-      `./src/pages/${pageName}`
-    );
+  entry: { index: './src/index.tsx' },
 
-    return config;
-  }, {} as any),
   output: {
-    path: path.resolve('./build'),
+    path: path.resolve('./build/client'),
     filename: '[name].bundle.js',
     clean: true,
     globalObject: 'this',
-    library: {
-      type: 'commonjs-static',
-    },
   },
-
-  plugins: [
-    new HTMLWebpackPlugin({
-      template: path.resolve('./public/index.html'),
-      inject: false,
-    }),
-  ],
 
   module: {
     rules: [

@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import * as React from 'react';
+import { navigate } from 'utils/events';
 
 interface Props {
   children?: React.ReactNode;
 }
 
 export default function Layout({ children }: Props) {
-  const [counter, setCounter] = useState(0);
+  const [counter, setCounter] = React.useState(0);
 
   const handleClick = (action: 'plus' | 'minus') => {
     action === 'plus'
@@ -18,10 +19,14 @@ export default function Layout({ children }: Props) {
       <nav>
         <ul>
           <li>
-            <a href='/about'>Страница Обо мне</a>
+            <button type='button' onClick={() => navigate('/about')}>
+              Страница Обо мне
+            </button>
           </li>
           <li>
-            <a href='/contacts'>Страница Контакт</a>
+            <button type='button' onClick={() => navigate('/contacts')}>
+              Страница Контакт
+            </button>
           </li>
         </ul>
       </nav>

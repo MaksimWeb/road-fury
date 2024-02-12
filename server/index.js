@@ -1,6 +1,4 @@
 const { renderToString } = require('react-dom/server');
-const { hydrateRoot } = require('react-dom/client');
-const React = require('react');
 
 const express = require('express');
 const app = express();
@@ -10,40 +8,40 @@ const fs = require('fs');
 
 const scriptPathRegexp = /.*\.js/;
 
+const mainScript = fs.readFileSync(
+  path.resolve('./build/client/index.bundle.js')
+);
+
 const myPages = fs.readdirSync(path.resolve('./src/pages'));
 
 myPages.forEach(async (page) => {
   const pageRouteName = page.replace('.tsx', '');
 
-  const pageHtml = fs.readFileSync(path.resolve('./build/index.html'), 'utf-8');
-  const pageScript = fs.readFileSync(
-    path.resolve(`./build/${pageRouteName}.bundle.js`)
+  const pageHtml = fs.readFileSync(
+    path.resolve('./build/server/index.html'),
+    'utf-8'
   );
 
   const Component = (
-    await import(path.resolve(`./build/${pageRouteName}.bundle.js`))
+    await import(path.resolve(`./build/server/${pageRouteName}.bundle.js`))
   ).default.default;
 
   const pageRoute = pageRouteName === 'index' ? '/' : `/${pageRouteName}`;
 
-  console.log(hydrateRoot(renderToString(Component()), Component()));
-
   app.get(pageRoute, (req, res) => {
-    const resultPage = pageHtml.replace(
-      '<!--mycode-->',
-      renderToString(Component())
-    );
-    // .replace(
-    //   '<!--myscript-->',
-    //   `<script defer src='./build/${pageRouteName}.bundle.js'></script>`
-    // );
+    const resultPage = pageHtml
+      .replace('<!--mycode-->', renderToString(Component()))
+      .replace(
+        '<!--myscript-->',
+        `<script defer src='./build/index.bundle.js'></script>`
+      );
 
     res.send(resultPage);
   });
 
-  // app.get(scriptPathRegexp, (req, res) => {
-  //   res.send(pageScript);
-  // });
+  app.get(scriptPathRegexp, (req, res) => {
+    res.send(mainScript);
+  });
 });
 
 app.listen(4001, () => {
