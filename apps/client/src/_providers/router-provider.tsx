@@ -1,4 +1,4 @@
-import Layout from 'layout';
+import Layout from '../layout';
 import { useRoute } from '../../hooks/use-route';
 
 interface RouterProviderProps {

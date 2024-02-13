@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { navigate } from 'utils/events';
+import { navigate } from '../src/utils/events';
 
 interface Props {
   children?: React.ReactNode;

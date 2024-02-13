@@ -1,9 +1,5 @@
 import webpack from 'webpack';
 import path from 'path';
-import HTMLWebpackPlugin from 'html-webpack-plugin';
-import fs from 'fs';
-
-const pages = fs.readdirSync(path.resolve('./src/pages'));
 
 export default (env: {
   mode: 'production' | 'development';
@@ -14,7 +10,7 @@ export default (env: {
   entry: { index: './src/index.tsx' },
 
   output: {
-    path: path.resolve('./build/client'),
+    path: path.resolve('./build'),
     filename: '[name].bundle.js',
     clean: true,
     globalObject: 'this',
@@ -24,8 +20,10 @@ export default (env: {
     rules: [
       {
         test: /\.tsx?$/,
-        exclude: '/node_modules',
-        use: ['babel-loader'],
+        loader: 'babel-loader',
+        options: {
+          rootMode: 'upward',
+        },
       },
     ],
   },

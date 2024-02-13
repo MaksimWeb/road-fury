@@ -3,7 +3,7 @@ import path from 'path';
 import HTMLWebpackPlugin from 'html-webpack-plugin';
 import fs from 'fs';
 
-const pages = fs.readdirSync(path.resolve('./src/pages'));
+const pages = fs.readdirSync(path.resolve('../client/src/pages'));
 
 // fs.writeFileSync(
 //   './routes.ts',
@@ -55,20 +55,18 @@ export default (env: {
   mode: 'production' | 'development';
   port: number;
 }): webpack.Configuration => ({
-  target: 'web',
   mode: env.mode,
   entry: {
-    index: './src/index.tsx',
     ...pages.reduce((config, pageName) => {
       config[pageName.replace('.tsx', '')] = path.resolve(
-        `./src/pages/${pageName}`
+        `../client/src/pages/${pageName}`
       );
 
       return config;
     }, {} as any),
   },
   output: {
-    path: path.resolve('./build/server'),
+    path: path.resolve('./build'),
     filename: '[name].bundle.js',
     clean: true,
     globalObject: 'this',
@@ -79,7 +77,7 @@ export default (env: {
 
   plugins: [
     new HTMLWebpackPlugin({
-      template: path.resolve('./public/index.html'),
+      template: path.resolve('../../public/index.html'),
       inject: false,
     }),
   ],
@@ -88,8 +86,10 @@ export default (env: {
     rules: [
       {
         test: /\.tsx?$/,
-        exclude: '/node_modules',
-        use: ['babel-loader'],
+        loader: 'babel-loader',
+        options: {
+          rootMode: 'upward',
+        },
       },
     ],
   },

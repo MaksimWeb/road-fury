@@ -9,21 +9,18 @@ const fs = require('fs');
 const scriptPathRegexp = /.*\.js/;
 
 const mainScript = fs.readFileSync(
-  path.resolve('./build/client/index.bundle.js')
+  path.resolve('../client/build/index.bundle.js')
 );
 
-const myPages = fs.readdirSync(path.resolve('./src/pages'));
+const myPages = fs.readdirSync(path.resolve('../client/src/pages'));
 
 myPages.forEach(async (page) => {
   const pageRouteName = page.replace('.tsx', '');
 
-  const pageHtml = fs.readFileSync(
-    path.resolve('./build/server/index.html'),
-    'utf-8'
-  );
+  const pageHtml = fs.readFileSync(path.resolve('./build/index.html'), 'utf-8');
 
   const Component = (
-    await import(path.resolve(`./build/server/${pageRouteName}.bundle.js`))
+    await import(path.resolve(`./build/${pageRouteName}.bundle.js`))
   ).default.default;
 
   const pageRoute = pageRouteName === 'index' ? '/' : `/${pageRouteName}`;
@@ -33,7 +30,9 @@ myPages.forEach(async (page) => {
       .replace('<!--mycode-->', renderToString(Component()))
       .replace(
         '<!--myscript-->',
-        `<script defer src='./build/index.bundle.js'></script>`
+        `<script defer src='${path.join(
+          '../client/build/index.bundle.js'
+        )}'></script>`
       );
 
     res.send(resultPage);
