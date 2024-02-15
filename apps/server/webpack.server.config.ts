@@ -1,7 +1,9 @@
+import { cached } from './../client/src/pages/about';
 import webpack from 'webpack';
 import path from 'path';
 import HTMLWebpackPlugin from 'html-webpack-plugin';
 import fs from 'fs';
+import { renderToString } from 'react-dom/server';
 
 const pages = fs.readdirSync(path.resolve('../client/src/pages'));
 
@@ -50,6 +52,10 @@ const pages = fs.readdirSync(path.resolve('../client/src/pages'));
 //     }, {})
 //   )}`
 // );
+const pageHtml = fs.readFileSync(
+  path.resolve('../../public/index.html'),
+  'utf-8'
+);
 
 export default (env: {
   mode: 'production' | 'development';
@@ -67,7 +73,15 @@ export default (env: {
   },
   output: {
     path: path.resolve('./build'),
-    filename: '[name].bundle.js',
+    filename: (pathdata) => {
+      const isCached = fs
+        .readFileSync(
+          path.resolve(`../client/src/pages/${pathdata.chunk.id}.tsx`)
+        )
+        .includes('cached');
+
+      return isCached ? 'cache/[name].bundle.js' : 'pages/[name].bundle.js';
+    },
     clean: true,
     globalObject: 'this',
     library: {
@@ -75,13 +89,36 @@ export default (env: {
     },
   },
 
-  plugins: [
-    new HTMLWebpackPlugin({
+  plugins: pages.map((page) => {
+    const isCached = fs
+      .readFileSync(path.resolve(`../client/src/pages/${page}`))
+
+      .includes('cached');
+
+    return new HTMLWebpackPlugin({
+      filename: isCached
+        ? path.resolve(`./build/cache/${page.replace('.tsx', '')}.html`)
+        : path.resolve('./build/index.html'),
       template: path.resolve('../../public/index.html'),
       inject: false,
-    }),
-  ],
+      templateContent: isCached
+        ? async () => {
+            const { default: Component, cached } = await import(
+              path.resolve(`../client/src/pages/${page}`)
+            );
 
+            const props = cached();
+
+            const resultPage = pageHtml.replace(
+              '<!--mycode-->',
+              renderToString(Component(props))
+            );
+
+            return resultPage;
+          }
+        : pageHtml,
+    });
+  }),
   module: {
     rules: [
       {

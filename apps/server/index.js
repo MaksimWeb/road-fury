@@ -14,29 +14,46 @@ const mainScript = fs.readFileSync(
 
 const myPages = fs.readdirSync(path.resolve('../client/src/pages'));
 
+const pageHtml = fs.readFileSync(path.resolve('./build/index.html'), 'utf-8');
+
 myPages.forEach(async (page) => {
   const pageRouteName = page.replace('.tsx', '');
-
-  const pageHtml = fs.readFileSync(path.resolve('./build/index.html'), 'utf-8');
-
-  const Component = (
-    await import(path.resolve(`./build/${pageRouteName}.bundle.js`))
-  ).default.default;
-
   const pageRoute = pageRouteName === 'index' ? '/' : `/${pageRouteName}`;
 
-  app.get(pageRoute, (req, res) => {
-    const resultPage = pageHtml
-      .replace('<!--mycode-->', renderToString(Component()))
-      .replace(
+  if (fs.existsSync(path.resolve(`./build/cache/${pageRouteName}.html`))) {
+    const cachedPage = fs.readFileSync(
+      path.resolve(`./build/cache/${pageRouteName}.html`),
+      'utf-8'
+    );
+
+    app.get(pageRoute, (req, res) => {
+      const resultPage = cachedPage.replace(
         '<!--myscript-->',
         `<script defer src='${path.join(
           '../client/build/index.bundle.js'
         )}'></script>`
       );
 
-    res.send(resultPage);
-  });
+      res.send(resultPage);
+    });
+  } else {
+    const Component = (
+      await import(path.resolve(`./build/pages/${pageRouteName}.bundle.js`))
+    ).default.default;
+
+    app.get(pageRoute, (req, res) => {
+      const resultPage = pageHtml
+        .replace('<!--mycode-->', renderToString(Component()))
+        .replace(
+          '<!--myscript-->',
+          `<script defer src='${path.join(
+            '../client/build/index.bundle.js'
+          )}'></script>`
+        );
+
+      res.send(resultPage);
+    });
+  }
 
   app.get(scriptPathRegexp, (req, res) => {
     res.send(mainScript);
