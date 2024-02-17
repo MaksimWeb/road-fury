@@ -21,21 +21,35 @@ myPages.forEach(async (page) => {
   const pageRoute = pageRouteName === 'index' ? '/' : `/${pageRouteName}`;
 
   if (fs.existsSync(path.resolve(`./build/cache/${pageRouteName}.html`))) {
-    const cachedPage = fs.readFileSync(
-      path.resolve(`./build/cache/${pageRouteName}.html`),
-      'utf-8'
-    );
-
-    app.get(pageRoute, (req, res) => {
-      const resultPage = cachedPage.replace(
-        '<!--myscript-->',
-        `<script defer src='${path.join(
-          '../client/build/index.bundle.js'
-        )}'></script>`
-      );
-
-      res.send(resultPage);
-    });
+    //   const { default: Component, cached } = await import(
+    //     path.resolve(`./build/cache/${pageRouteName}.bundle.js`)
+    //   );
+    //   const cachedPage = fs.readFileSync(
+    //     path.resolve(`./build/cache/${pageRouteName}.html`),
+    //     'utf-8'
+    //   );
+    //   console.log(cached());
+    //   console.log(renderToString(Component.default()));
+    //   app.get(pageRoute, (req, res) => {
+    //     const resultPage = cachedPage
+    //       .replace(
+    //         '<!--mycode-->',
+    //         renderToString(Component.default(cached.props))
+    //       )
+    //       .replace(
+    //         '<!--myscript-->',
+    //         `<script defer src='${path.join(
+    //           '../client/build/index.bundle.js'
+    //         )}'></script>`
+    //       )
+    //       .replace(
+    //         '<!--page-data-->',
+    //         `<script id="PAGE_DATA" type="application/json">${JSON.stringify({
+    //           max: 'posakdop',
+    //         })}</script>`
+    //       );
+    //     res.send(resultPage);
+    //   });
   } else {
     const Component = (
       await import(path.resolve(`./build/pages/${pageRouteName}.bundle.js`))

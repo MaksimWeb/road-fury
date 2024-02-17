@@ -6,7 +6,7 @@ interface AboutPageProps {
   userName: string;
 }
 
-export default function About({ userName }: AboutPageProps) {
+export default function About({ userName }: any) {
   return (
     <div>
       <h1>My About Page</h1>
@@ -19,6 +19,8 @@ export default function About({ userName }: AboutPageProps) {
 export const cached = () => {
   return {
     revalidate: REVALIDATE_INTERVAL,
-    userName: 'Maxim',
+    props: {
+      userName: 'Maxim',
+    },
   };
 };

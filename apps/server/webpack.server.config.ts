@@ -103,15 +103,17 @@ export default (env: {
       inject: false,
       templateContent: isCached
         ? async () => {
-            const { default: Component, cached } = await import(
+            const { cached } = await import(
               path.resolve(`../client/src/pages/${page}`)
             );
 
-            const props = cached();
+            const { props } = cached();
 
             const resultPage = pageHtml.replace(
-              '<!--mycode-->',
-              renderToString(Component(props))
+              '<!--page-data-->',
+              `<script id="PAGE_DATA" type="application/json">${JSON.stringify(
+                props
+              )}</script>`
             );
 
             return resultPage;

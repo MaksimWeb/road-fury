@@ -1,17 +1,27 @@
 import { useEffect, useState } from 'react';
 
 export function useRoute() {
-  const [pathName, setPathName] = useState(window.location.pathname);
+  const [pathName, setPathName] = useState(
+    typeof window !== 'undefined' ? window.location.pathname : ''
+  );
 
   function handleRouteEvent(e: CustomEvent<string>) {
-    window.history.pushState(null, '', e.detail);
-    setPathName(e.detail);
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', e.detail);
+      setPathName(e.detail);
+    }
   }
 
   useEffect(() => {
-    window.addEventListener('change-route', handleRouteEvent);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('change-route', handleRouteEvent);
+    }
 
-    return () => window.removeEventListener('change-route', handleRouteEvent);
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('change-route', handleRouteEvent);
+      }
+    };
   }, []);
 
   return { pathName };
