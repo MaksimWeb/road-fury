@@ -1,9 +1,7 @@
-import { cached } from './../client/src/pages/about';
 import webpack from 'webpack';
 import path from 'path';
 import HTMLWebpackPlugin from 'html-webpack-plugin';
 import fs from 'fs';
-import { renderToString } from 'react-dom/server';
 
 const pages = fs.readdirSync(path.resolve('../client/src/pages'));
 
@@ -57,6 +55,8 @@ const pageHtml = fs.readFileSync(
   'utf-8'
 );
 
+const pageLayoutPath = path.resolve('../client/src/layout.tsx');
+
 export default (env: {
   mode: 'production' | 'development';
   port: number;
@@ -103,18 +103,24 @@ export default (env: {
       inject: false,
       templateContent: isCached
         ? async () => {
-            const { cached } = await import(
+            const { default: Layout } = await import(pageLayoutPath);
+
+            const { default: Component, cached } = await import(
               path.resolve(`../client/src/pages/${page}`)
             );
 
             const { props } = cached();
 
-            const resultPage = pageHtml.replace(
-              '<!--page-data-->',
-              `<script id="PAGE_DATA" type="application/json">${JSON.stringify(
-                props
-              )}</script>`
-            );
+            console.log(Layout(Component(props)));
+
+            const resultPage = pageHtml
+              // .replace('<!--mycode-->', fullRenderedPage)
+              .replace(
+                '<!--page-data-->',
+                `<script id="PAGE_DATA" type="application/json">${JSON.stringify(
+                  props
+                )}</script>`
+              );
 
             return resultPage;
           }

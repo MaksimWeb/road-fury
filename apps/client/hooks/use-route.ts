@@ -6,22 +6,14 @@ export function useRoute() {
   );
 
   function handleRouteEvent(e: CustomEvent<string>) {
-    if (typeof window !== 'undefined') {
-      window.history.pushState(null, '', e.detail);
-      setPathName(e.detail);
-    }
+    window.history.pushState(null, '', e.detail);
+    setPathName(e.detail);
   }
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.addEventListener('change-route', handleRouteEvent);
-    }
+    window.addEventListener('change-route', handleRouteEvent);
 
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('change-route', handleRouteEvent);
-      }
-    };
+    return () => window.removeEventListener('change-route', handleRouteEvent);
   }, []);
 
   return { pathName };

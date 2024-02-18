@@ -22,10 +22,6 @@
     "url": "https://github.com/MaksimWeb/road-fury/issues"
   },
   "homepage": "https://github.com/MaksimWeb/road-fury#readme",
-  "dependencies": {
-    "@monorepo/client": "^1.0.0",
-    "@monorepo/server": "^1.0.0"
-  },
   "devDependencies": {
     "@babel/core": "^7.23.9",
     "@babel/preset-env": "^7.23.9",
@@ -40,5 +36,9 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "webpack": "^5.90.0"
+  },
+  "dependencies": {
+    "@road-fury/client": "^1.0.0",
+    "@road-fury/server": "^1.0.0"
   }
 }
