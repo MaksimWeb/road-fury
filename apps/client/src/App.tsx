@@ -7,17 +7,10 @@ import { RouterProvider } from './_providers/router-provider';
 export default function App() {
   const { pathName } = useRoute();
 
-  let pageProps = {};
-  React.useEffect(() => {
-    if (document && document.getElementById('PAGE_DATA')) {
-      // @ts-ignore
-      pageProps = JSON.parse(document.getElementById('PAGE_DATA').textContent);
-    }
-  }, []);
-
-  if (typeof window === 'undefined') {
-    return null;
-  }
+  const pageProps =
+    typeof document !== undefined && document.getElementById('PAGE_DATA')
+      ? JSON.parse(document.getElementById('PAGE_DATA')?.textContent ?? '{}')
+      : {};
 
   const Page = routes ? routes[pathName.slice(1) as keyof typeof routes] : null;
 

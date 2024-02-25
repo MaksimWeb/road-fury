@@ -1,11 +1,20 @@
-import path from 'path';
 import webpack from 'webpack';
+import path from 'path';
 
 export default (env: {
   mode: 'production' | 'development';
   port: number;
 }): webpack.Configuration => ({
+  target: 'web',
   mode: env.mode,
+  entry: { index: './src/index.tsx' },
+
+  output: {
+    path: path.resolve('./build/main'),
+    filename: '[name].bundle.js',
+    clean: true,
+    globalObject: 'this',
+  },
 
   module: {
     rules: [
@@ -21,16 +30,11 @@ export default (env: {
 
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js'],
-    modules: [path.resolve(__dirname, 'apps', 'client', 'src'), 'node_modules'],
+    modules: [path.resolve(__dirname, 'src'), 'node_modules'],
     mainFiles: ['index'],
     fallback: {
       path: require.resolve('path-browserify'),
     },
-  },
-
-  externals: {
-    react: 'commonjs-module react',
-    'react-dom': 'commonjs-module react-dom',
   },
 
   devtool: 'inline-source-map',

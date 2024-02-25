@@ -7,78 +7,81 @@ const app = express();
 
 const scriptPathRegexp = /.*\.js/;
 
-const mainScript = fs.readFileSync(
-  path.resolve('../client/build/index.bundle.js')
-);
-
 const myPages = fs.readdirSync(path.resolve('../client/src/pages'));
 
 const pageHtml = fs.readFileSync(
   path.resolve('../client/build/index.html'),
   'utf-8'
 );
-const pageLayoutPath = path.resolve('../client/src/layout.tsx');
+const pageLayoutPath = path.resolve('../client/build/layout.bundle.js');
 
 myPages.forEach(async (page) => {
   const pageRouteName = page.replace('.tsx', '');
   const pageRoute = pageRouteName === 'index' ? '/' : `/${pageRouteName}`;
 
-  if (fs.existsSync(path.resolve(`./build/cache/${pageRouteName}.html`))) {
-    const { default: Layout } = await import(pageLayoutPath);
-
-    const { default: Component, cached } = await import(
-      path.resolve(`./build/cache/${pageRouteName}.bundle.js`)
-    );
+  if (
+    fs.existsSync(path.resolve(`../client/build/cache/${pageRouteName}.html`))
+  ) {
     const cachedPage = fs.readFileSync(
-      path.resolve(`./build/cache/${pageRouteName}.html`),
+      path.resolve(`../client/build/cache/${pageRouteName}.html`),
       'utf-8'
     );
 
-    const CCC = Component.default;
+    app.get(pageRoute, (req, res) => {
+      const resultPage = cachedPage.replace(
+        '<!--myscript-->',
+        `<script type='module' defer src='${path.join(
+          '../client/build/main/index.bundle.js'
+        )}'></script>`
+      );
 
-    console.log(renderToString(<div />));
+      res.set('Cache-Control', 'no-cache');
+      res.send(resultPage);
+    });
+  } else {
+    const {
+      default: { default: Layout },
+    } = await import(pageLayoutPath);
+
+    const {
+      default: { default: Component, SSR },
+    } = await import(
+      path.resolve(`../client/build/pages/${pageRouteName}.bundle.js`)
+    );
+
+    const { props } = await SSR();
 
     app.get(pageRoute, (req, res) => {
-      const resultPage = cachedPage
+      const resultPage = pageHtml
         .replace(
           '<!--mycode-->',
-          renderToString(Component.default(cached.props))
+          renderToString(
+            <Layout>
+              <Component {...props} />
+            </Layout>
+          )
         )
         .replace(
           '<!--myscript-->',
-          `<script defer src='${path.join(
-            '../client/build/index.bundle.js'
+          `<script type='module' defer src='${path.join(
+            '../client/build/main/index.bundle.js'
           )}'></script>`
         )
         .replace(
           '<!--page-data-->',
-          `<script id="PAGE_DATA" type="application/json">${JSON.stringify({
-            max: 'posakdop',
-          })}</script>`
-        );
-      res.send(resultPage);
-    });
-  } else {
-    const Component = (
-      await import(path.resolve(`./build/pages/${pageRouteName}.bundle.js`))
-    ).default.default;
-
-    app.get(pageRoute, (req, res) => {
-      const resultPage = pageHtml
-        .replace('<!--mycode-->', renderToString(Component()))
-        .replace(
-          '<!--myscript-->',
-          `<script defer src='${path.join(
-            '../client/build/index.bundle.js'
-          )}'></script>`
+          `<script id="PAGE_DATA" type="application/json">${JSON.stringify(
+            props
+          )}</script>`
         );
 
+      res.set('Cache-Control', 'no-cache');
       res.send(resultPage);
     });
   }
 
   app.get(scriptPathRegexp, (req, res) => {
-    res.send(mainScript);
+    res.set('Cache-Control', 'no-cache');
+    res.sendFile(path.resolve('../client/build/main/index.bundle.js'));
   });
 });
 

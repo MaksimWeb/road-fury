@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:client": "webpack --config ./webpack.client.config.ts --env mode=development"
+    "build:client": "webpack --config ./webpack.client.config.tsx --env mode=development",
+    "build:hydrate": "webpack --config ./webpack.hydrate.config.ts --env mode=development"
   },
   "repository": {
     "type": "git",
