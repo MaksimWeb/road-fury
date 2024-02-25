@@ -5,7 +5,7 @@ import fs from 'fs';
 import { renderToString } from 'react-dom/server';
 import { buildRoutes } from './src/utils/build-routes';
 
-buildRoutes();
+const routes = buildRoutes();
 
 const pages = fs.readdirSync(path.resolve('../client/src/pages'));
 const pageHtml = fs.readFileSync(

@@ -14,7 +14,7 @@ export default function Contacts({ posts }: ContactsProps) {
     <div>
       <h1 style={{ color: 'green' }}>You are the best my friend</h1>
 
-      {posts.map((post) => (
+      {posts?.map((post) => (
         <div key={post.id}>
           <h2>{post.title}</h2>
           <p>{post.body}</p>

@@ -8,7 +8,6 @@ const scriptPathRegexp = /.*\.js/;
 const myPages = fs.readdirSync(path.resolve('../client/src/pages'));
 const pageHtml = fs.readFileSync(path.resolve('../client/build/index.html'), 'utf-8');
 const pageLayoutPath = path.resolve('../client/build/layout.bundle.js');
-console.log(fs.statSync(path.resolve('../client/src/layout.tsx')).isDirectory());
 myPages.forEach(async (page) => {
     const pageRouteName = page.replace('.tsx', '');
     const pageRoute = pageRouteName === 'index' ? '/' : `/${pageRouteName}`;

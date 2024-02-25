@@ -33,8 +33,21 @@ export function buildRoutes() {
             fs.existsSync(path.resolve(`./src/${fileName}/${pageName}/layout`))
           ) {
             routes[pageName.replace('.tsx', '')] = {
-              page: path.resolve(`./src/${fileName}/${pageName}`),
-              layout: path.resolve(`./src/${fileName}/${pageName}/layout`),
+              page: path.resolve(`./src/${fileName}/${pageName}/index.tsx`),
+              layout: path.resolve(
+                `./src/${fileName}/${pageName}/layout/index.tsx`
+              ),
+            };
+          }
+
+          if (
+            fs.existsSync(
+              path.resolve(`./src/${fileName}/${pageName}/layout.tsx`)
+            )
+          ) {
+            routes[pageName.replace('.tsx', '')] = {
+              page: path.resolve(`./src/${fileName}/${pageName}/index.tsx`),
+              layout: path.resolve(`./src/${fileName}/${pageName}/layout.tsx`),
             };
           }
         }
@@ -42,5 +55,5 @@ export function buildRoutes() {
     }
   });
 
-  console.log(routes);
+  return routes;
 }
