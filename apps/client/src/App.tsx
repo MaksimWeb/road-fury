@@ -10,6 +10,7 @@ export default function App() {
   let pageProps = {};
   React.useEffect(() => {
     if (document && document.getElementById('PAGE_DATA')) {
+      // @ts-ignore
       pageProps = JSON.parse(document.getElementById('PAGE_DATA').textContent);
     }
   }, []);
@@ -22,6 +23,7 @@ export default function App() {
 
   return (
     <RouterProvider>
+      {/* @ts-ignore */}
       <Page {...pageProps} />
     </RouterProvider>
   );

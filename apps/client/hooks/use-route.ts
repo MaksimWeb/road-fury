@@ -11,8 +11,10 @@ export function useRoute() {
   }
 
   useEffect(() => {
+    // @ts-ignore
     window.addEventListener('change-route', handleRouteEvent);
 
+    // @ts-ignore
     return () => window.removeEventListener('change-route', handleRouteEvent);
   }, []);
 

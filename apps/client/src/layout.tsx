@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 import { navigate } from '../src/utils/events';
 
 interface Props {
@@ -6,7 +6,7 @@ interface Props {
 }
 
 export default function Layout({ children }: Props) {
-  const [counter, setCounter] = React.useState(0);
+  const [counter, setCounter] = useState(0);
 
   const handleClick = (action: 'plus' | 'minus') => {
     action === 'plus'

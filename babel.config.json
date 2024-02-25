@@ -16,7 +16,13 @@
         "modules": "commonjs"
       }
     ],
-    "@babel/preset-typescript"
+    [
+      "@babel/preset-typescript",
+      {
+        "isTSX": true,
+        "allExtensions": true
+      }
+    ]
   ],
   "env": {
     "test": {
