@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function useRoute() {
   const [pathName, setPathName] = useState(
     typeof window !== 'undefined' ? window.location.pathname : ''
   );
-  const [render, setRender] = useState(0);
+  const renderRef = useRef(0);
 
   function handleRouteEvent(e: CustomEvent<string>) {
     window.history.pushState(null, '', e.detail);
     setPathName(e.detail);
-    setRender((prev) => prev + 1);
+    renderRef.current = 1;
   }
 
   useEffect(() => {
@@ -20,5 +20,5 @@ export function useRoute() {
     return () => window.removeEventListener('change-route', handleRouteEvent);
   }, []);
 
-  return { pathName, render };
+  return { pathName, renderCount: renderRef.current };
 }

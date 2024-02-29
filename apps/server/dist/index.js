@@ -22,7 +22,7 @@ myPages.forEach(async (page) => {
     else {
         const { default: { default: Layout }, } = await import(pageLayoutPath);
         const { default: { default: Component, SSR }, } = await import(path.resolve(`../client/build/pages/${pageRouteName}.bundle.js`));
-        const { props } = await SSR();
+        const { props = {} } = SSR ? await SSR() : {};
         app.get(pageRoute, (req, res) => {
             const resultPage = pageHtml
                 .replace('<!--mycode-->', renderToString(_jsx(Layout, { children: _jsx(Component, { ...props }) })))

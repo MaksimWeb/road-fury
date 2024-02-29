@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "routes": "node ./src/utils/build-routes.js",
     "build:client": "webpack --config ./webpack.client.config.tsx --env mode=development",
     "build:hydrate": "webpack --config ./webpack.hydrate.config.ts --env mode=development"
   },

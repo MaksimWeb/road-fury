@@ -18,7 +18,7 @@ export default function About({
   );
 }
 
-export const cached = () => {
+export const cached = async () => {
   return {
     revalidate: REVALIDATE_INTERVAL,
     props: {

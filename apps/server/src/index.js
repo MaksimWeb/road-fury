@@ -49,7 +49,7 @@ myPages.forEach(async (page) => {
       path.resolve(`../client/build/pages/${pageRouteName}.bundle.js`)
     );
 
-    const { props } = await SSR();
+    const { props = {} } = SSR ? await SSR() : {};
 
     app.get(pageRoute, (req, res) => {
       const resultPage = pageHtml

@@ -3,11 +3,9 @@ import webpack from 'webpack';
 import path from 'path';
 import fs from 'fs';
 import { renderToString } from 'react-dom/server';
-import { buildRoutes } from './src/utils/build-routes';
+import routes from '../../routes.json';
 
-const routes = buildRoutes();
-
-const pages = fs.readdirSync(path.resolve('../client/src/pages'));
+const pages = Object.entries(routes);
 const pageHtml = fs.readFileSync(
   path.resolve('../../public/index.html'),
   'utf-8'
@@ -22,10 +20,10 @@ export default (env: {
   mode: env.mode,
   entry: {
     layout: './src/layout.tsx',
-    ...pages.reduce((config, pageName) => {
-      config[pageName.replace('.tsx', '')] = path.resolve(
-        `../client/src/pages/${pageName}`
-      );
+    ...pages.reduce((config, [pageName, pageValue]) => {
+      if ('page' in pageValue) {
+        config[pageName] = path.resolve(pageValue.page);
+      }
 
       return config;
     }, {} as any),
@@ -38,10 +36,9 @@ export default (env: {
         return '[name].bundle.js';
       }
 
+      const route = routes[String(pathdata.chunk?.id) as keyof typeof routes];
       const isCached = fs
-        .readFileSync(
-          path.resolve(`../client/src/pages/${pathdata.chunk?.id}.tsx`)
-        )
+        .readFileSync(path.resolve('page' in route ? route.page : ''))
         .includes('cached');
 
       return isCached ? 'cache/[name].bundle.js' : 'pages/[name].bundle.js';
@@ -54,14 +51,15 @@ export default (env: {
   },
 
   plugins: [
-    ...pages.map((page) => {
-      const isCached = fs
-        .readFileSync(path.resolve(`../client/src/pages/${page}`))
-        .includes('cached');
+    ...pages.map(([pageName, pageValue]) => {
+      const isCached =
+        'page' in pageValue
+          ? fs.readFileSync(pageValue.page).includes('cached')
+          : false;
 
       return new HTMLWebpackPlugin({
         filename: isCached
-          ? path.resolve(`./build/cache/${page.replace('.tsx', '')}.html`)
+          ? path.resolve(`./build/cache/${pageName}.html`)
           : path.resolve('./build/index.html'),
         template: path.resolve('../../public/index.html'),
         inject: false,
@@ -72,10 +70,10 @@ export default (env: {
               );
 
               const { default: Component, cached } = await import(
-                path.resolve(`../client/src/pages/${page}`)
+                'page' in pageValue ? pageValue.page : ''
               );
 
-              const { props } = cached();
+              const { props } = await cached();
 
               const fullRenderedPage = renderToString(
                 <Layout>

@@ -1,43 +1,53 @@
 import React, { useEffect, useState } from 'react';
 
 import { useRoute } from '../hooks/use-route';
-import { routes } from '../../../routes';
+
 import { RouterProvider } from './_providers/router-provider';
+import { middleware } from './_middleware';
+import About from './pages/about';
 
 export default function App() {
-  const { pathName, render } = useRoute();
+  const { pathName, renderCount } = useRoute();
+
+  const Page = middleware(pathName.slice(1) as any);
+
   const [dynamicProps, setDynamicProps] = useState<any | null>(null);
 
+  useEffect(() => {
+    const sss = async () => {
+      console.log(await Page);
+    };
+
+    sss();
+  }, []);
+
   let pageProps =
-    render === 0
+    renderCount === 0
       ? typeof document !== undefined && document.getElementById('PAGE_DATA')
         ? JSON.parse(document.getElementById('PAGE_DATA')?.textContent ?? '{}')
         : {}
       : dynamicProps?.props;
 
-  const Page = routes
-    ? routes[pathName.slice(1) as keyof typeof routes].page
-    : null;
+  // useEffect(() => {
+  //   const getProps = async () => {
+  //     if (renderCount !== 0) {
+  //       setDynamicProps(
+  //         routes[pathName.slice(1) as keyof typeof routes].isStatic &&
+  //           !checkPromise(routes[pathName.slice(1) as keyof typeof routes])
+  //           ? routes[pathName.slice(1) as keyof typeof routes].props
+  //           : await routes[pathName.slice(1) as keyof typeof routes].props
+  //       );
+  //     }
+  //   };
 
-  useEffect(() => {
-    const getProps = async () => {
-      if (render !== 0) {
-        setDynamicProps(
-          routes[pathName.slice(1) as keyof typeof routes].isStatic &&
-            !checkPromise(routes[pathName.slice(1) as keyof typeof routes])
-            ? routes[pathName.slice(1) as keyof typeof routes].props
-            : await routes[pathName.slice(1) as keyof typeof routes].props
-        );
-      }
-    };
-
-    getProps();
-  }, [pathName, render]);
+  //   getProps();
+  // }, [pathName, render]);
 
   return (
     <RouterProvider>
       {/* @ts-ignore */}
-      <Page {...pageProps} />
+      {/* <Page {...pageProps} /> */}
+      <About userName='Maxim' />
     </RouterProvider>
   );
 }
