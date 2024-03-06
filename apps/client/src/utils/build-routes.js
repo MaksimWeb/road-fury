@@ -7,6 +7,7 @@ const allowedFileNameInPageDir = ['index.tsx', 'layout.tsx', 'layout'];
   const clientPageStructure = fs.readdirSync(path.resolve('./src'));
 
   const routes = {};
+  let components = '';
 
   clientPageStructure.forEach((fileName) => {
     if (fileName === 'layout.tsx') {
@@ -29,9 +30,37 @@ const allowedFileNameInPageDir = ['index.tsx', 'layout.tsx', 'layout'];
             .statSync(path.resolve(`./src/${fileName}/${pageName}`))
             .isDirectory()
         ) {
+          const isCached = fs
+            .readFileSync(path.resolve(`./src/${fileName}/${pageName}`))
+            .includes('cached');
+          const isSSR = fs
+            .readFileSync(path.resolve(`./src/${fileName}/${pageName}`))
+            .includes('SSR');
+
+          const pagePropsNaming = `props${pageName.replace('.tsx', '')}`;
+
+          const importPageProps = isCached
+            ? `,{cached as ${pagePropsNaming}}`
+            : isSSR
+            ? `,{SSR as ${pagePropsNaming}}`
+            : '';
+          const exportPageProps =
+            isCached || isSSR ? `,${pagePropsNaming}` : '';
+
           routes[pageName.replace('.tsx', '')] = {
             page: path.resolve(`./src/${fileName}/${pageName}`),
           };
+
+          components =
+            components +
+            `import ${
+              pageName[0].toUpperCase() + pageName.slice(1).replace('.tsx', '')
+            } ${importPageProps} from '${path.resolve(
+              `./src/${fileName}/${pageName.replace('.tsx', '')}`
+            )}'
+            export {${
+              pageName[0].toUpperCase() + pageName.slice(1).replace('.tsx', '')
+            } ${exportPageProps}}\n`;
         } else {
           const pageDirectory = fs.readdirSync(
             path.resolve(`./src/${fileName}/${pageName}`)
@@ -83,9 +112,42 @@ const allowedFileNameInPageDir = ['index.tsx', 'layout.tsx', 'layout'];
             }
 
             if (pageFileName === 'index.tsx') {
+              const isCached = fs
+                .readFileSync(
+                  path.resolve(`./src/${fileName}/${pageName}/${pageFileName}`)
+                )
+                .includes('cached');
+              const isSSR = fs
+                .readFileSync(
+                  path.resolve(`./src/${fileName}/${pageName}/${pageFileName}`)
+                )
+                .includes('SSR');
+
+              const pagePropsNaming = `props${pageName.replace('.tsx', '')}`;
+
+              const importPageProps = isCached
+                ? `,{cached as ${pagePropsNaming}}`
+                : isSSR
+                ? `,{SSR as ${pagePropsNaming}}`
+                : '';
+              const exportPageProps =
+                isCached || isSSR ? `,${pagePropsNaming}` : '';
+
               routes[pageName.replace('.tsx', '')].page = path.resolve(
                 `./src/${fileName}/${pageName}/${pageFileName}`
               );
+
+              components =
+                components +
+                `import ${
+                  pageName[0].toUpperCase() +
+                  pageName.slice(1).replace('.tsx', '')
+                } ${importPageProps} from '${path.resolve(
+                  `./src/${fileName}/${pageName.replace('.tsx', '')}`
+                )}'
+            export {${
+              pageName[0].toUpperCase() + pageName.slice(1).replace('.tsx', '')
+            } ${exportPageProps}}\n`;
             }
           });
         }
@@ -94,6 +156,9 @@ const allowedFileNameInPageDir = ['index.tsx', 'layout.tsx', 'layout'];
   });
 
   fs.writeFileSync(path.resolve('../../routes.json'), JSON.stringify(routes), {
+    encoding: 'utf-8',
+  });
+  fs.writeFileSync(path.resolve('../../pages.ts'), components, {
     encoding: 'utf-8',
   });
 })();

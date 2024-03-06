@@ -1,44 +1,22 @@
-import path from 'path';
+import { useEffect, useState } from 'react';
+import * as data from '../data';
 import routes from '../../../routes.json';
+import * as pages from '../../../pages';
 
-// type CreateMutable<Type> = {
-//   -readonly [Property in keyof Type]: Type[Property];
-// };
+export function useMiddleware(pathname: string) {
+  //@ts-ignore
+  const [pageData, setPageData] = useState(data[pathname] ?? {});
 
-// type Pathname = {
-//   [k in keyof typeof routes]: {
-//     page: string;
-//     layout?: string;
-//   };
-// };
+  useEffect(() => {
+    const getPageProps = async () => {
+      //@ts-ignore
+      const { props, revalidate }: any = await pages[`props${pathname}`]();
 
-type ss = keyof typeof routes;
+      setPageData(props);
+    };
 
-export async function middleware(pathname: keyof typeof routes) {
-  const route = routes[pathname];
+    getPageProps();
+  }, [pathname]);
 
-  const Component = isPage(route)
-    ? await import(`./pages/${formatAbsoluteToRelative(route.page, pathname)}`)
-    : null;
-
-  console.log(Component);
-  return Component;
-}
-
-interface PageLayout {
-  layout: string;
-  page: string;
-}
-
-function isPage(route: unknown): route is PageLayout {
-  return 'page' in (route as Partial<PageLayout>);
-}
-
-function formatAbsoluteToRelative(pathname: string, route: string) {
-  const ext = path.extname(pathname);
-  const basename = path.basename(pathname);
-  console.log('./pages/about' === `./pages/${basename.replace(ext, '')}`);
-  return basename.replace(ext, '') === route
-    ? basename.replace(ext, '')
-    : `${route}/${basename.replace(ext, '')}`;
+  return pageData;
 }

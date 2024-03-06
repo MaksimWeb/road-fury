@@ -90,6 +90,15 @@ export default (env: {
                   )}</script>`
                 );
 
+              fs.writeFileSync(
+                path.resolve(`data.ts`),
+                `export const ${pageName} =  ${JSON.stringify(props)};\n`,
+                {
+                  encoding: 'utf-8',
+                  flag: 'a',
+                }
+              );
+
               return resultPage;
             }
           : pageHtml,
