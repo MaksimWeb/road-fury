@@ -22,6 +22,17 @@ myPages.forEach(async (page) => {
   if (
     fs.existsSync(path.resolve(`../client/build/cache/${pageRouteName}.html`))
   ) {
+    const {
+      default: { default: Component, cached },
+    } = await import(
+      path.resolve(`../client/build/cache/${pageRouteName}.bundle.js`)
+    );
+
+    const { props = {}, revalidate = 0 } = cached ? await cached() : {};
+
+    const {
+      default: { default: Layout },
+    } = await import(pageLayoutPath);
     const cachedPage = fs.readFileSync(
       path.resolve(`../client/build/cache/${pageRouteName}.html`),
       'utf-8'
@@ -37,6 +48,56 @@ myPages.forEach(async (page) => {
 
       res.set('Cache-Control', 'no-cache');
       res.send(resultPage);
+    });
+
+    app.get(`/props${pageRouteName}`, (req, res) => {
+      const { props: cachedProps, createDate } = JSON.parse(
+        fs.readFileSync(
+          path.resolve(`../client/cache-data/${pageRouteName}.json`)
+        )
+      );
+
+      if (Date.now() - createDate > revalidate) {
+        fs.writeFileSync(
+          path.resolve(`../client/cache-data/${pageRouteName}.json`),
+          `${JSON.stringify({
+            props,
+            createDate: Date.now(),
+          })}`,
+          {
+            encoding: 'utf-8',
+          }
+        );
+
+        const fullRenderedPage = renderToString(
+          <Layout>
+            <Component {...props} />
+          </Layout>
+        );
+
+        console.log(222, cachedProps);
+        console.log(fullRenderedPage);
+
+        const resultPage = pageHtml
+          .replace('<!--mycode-->', fullRenderedPage)
+          .replace(
+            '<!--page-data-->',
+            `<script id="PAGE_DATA" type="application/json">${JSON.stringify({
+              ...props,
+            })}</script>`
+          );
+
+        fs.writeFileSync(
+          path.resolve(`../client/build/cache/${pageRouteName}.html`),
+          resultPage,
+          {
+            encoding: 'utf-8',
+          }
+        );
+        res.json(props);
+      } else {
+        res.json(cachedProps);
+      }
     });
   } else {
     const {

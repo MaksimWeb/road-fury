@@ -1,1 +1,1 @@
-export const REVALIDATE_INTERVAL = 3600;
+export const REVALIDATE_INTERVAL = 36000;

@@ -5,6 +5,12 @@ import fs from 'fs';
 import { renderToString } from 'react-dom/server';
 import routes from '../../routes.json';
 
+if (fs.existsSync(path.resolve('cache-data'))) {
+  fs.rmdirSync(path.resolve('cache-data'), { recursive: true });
+}
+
+fs.mkdirSync(path.resolve('cache-data'));
+
 const pages = Object.entries(routes);
 const pageHtml = fs.readFileSync(
   path.resolve('../../public/index.html'),
@@ -91,11 +97,13 @@ export default (env: {
                 );
 
               fs.writeFileSync(
-                path.resolve(`data.ts`),
-                `export const ${pageName} =  ${JSON.stringify(props)};\n`,
+                path.resolve(`./cache-data/${pageName}.json`),
+                `${JSON.stringify({
+                  props,
+                  createDate: Date.now(),
+                })}`,
                 {
                   encoding: 'utf-8',
-                  flag: 'a',
                 }
               );
 
