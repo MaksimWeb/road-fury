@@ -41,5 +41,8 @@
     "@road-fury/client": "^1.0.0",
     "@road-fury/server": "^1.0.0",
     "node-fetch": "^3.3.2"
+  },
+  "publishConfig": {
+    "@MaksimWeb:registry": "https://npm.pkg.github.com"
   }
 }
