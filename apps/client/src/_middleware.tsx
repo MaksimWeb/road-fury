@@ -1,25 +1,16 @@
 import { useEffect, useState } from 'react';
-import * as pages from '../../../pages';
+import axios from 'axios';
 
 export function useMiddleware(pathname: string) {
-  //@ts-ignore
   const [pageData, setPageData] = useState({});
 
   useEffect(() => {
     const getPageProps = async () => {
-      //@ts-ignore
-      const { props, revalidate }: any = await pages[`props${pathname}`]();
+      const response = await axios.get(
+        `http://localhost:4001/props${pathname}`
+      );
 
-      if (Boolean(revalidate)) {
-        //@ts-ignore
-
-        const response = await fetch(`http://localhost:4001/props${pathname}`);
-        const answer = await response.json();
-
-        setPageData(answer);
-      } else {
-        setPageData(props);
-      }
+      setPageData(response.data);
     };
 
     getPageProps();

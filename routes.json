@@ -1,1 +1,13 @@
-{"index":{"layout":"/Users/mlyugay/road-fury/apps/client/src/layout.tsx"},"about":{"page":"/Users/mlyugay/road-fury/apps/client/src/pages/about.tsx"},"contacts":{"page":"/Users/mlyugay/road-fury/apps/client/src/pages/contacts.tsx"},"user":{"page":"/Users/mlyugay/road-fury/apps/client/src/pages/user/index.tsx","layout":"/Users/mlyugay/road-fury/apps/client/src/pages/user/layout/index.tsx"}}
+{
+  "index": { "layout": "/Users/mlyugay/road-fury/apps/client/src/layout.tsx" },
+  "about": {
+    "page": "/Users/mlyugay/road-fury/apps/client/src/pages/about.tsx"
+  },
+  "contacts": {
+    "page": "/Users/mlyugay/road-fury/apps/client/src/pages/contacts.tsx"
+  },
+  "user": {
+    "page": "/Users/mlyugay/road-fury/apps/client/src/pages/user/index.tsx",
+    "layout": "/Users/mlyugay/road-fury/apps/client/src/pages/user/layout/index.tsx"
+  }
+}

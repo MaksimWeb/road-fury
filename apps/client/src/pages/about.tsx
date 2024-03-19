@@ -18,7 +18,7 @@ export default function About({
   );
 }
 
-export const cached = async () => {
+export const getPageProps = async () => {
   return {
     revalidate: REVALIDATE_INTERVAL,
     props: {

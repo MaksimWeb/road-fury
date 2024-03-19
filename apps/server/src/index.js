@@ -19,38 +19,55 @@ myPages.forEach(async (page) => {
   const pageRouteName = page.replace('.tsx', '');
   const pageRoute = pageRouteName === 'index' ? '/' : `/${pageRouteName}`;
 
-  if (
-    fs.existsSync(path.resolve(`../client/build/cache/${pageRouteName}.html`))
-  ) {
-    const {
-      default: { default: Component, cached },
-    } = await import(
-      path.resolve(`../client/build/cache/${pageRouteName}.bundle.js`)
-    );
+  const {
+    default: { default: Layout },
+  } = await import(pageLayoutPath);
 
-    const { props = {}, revalidate = 0 } = cached ? await cached() : {};
+  const {
+    default: { default: Component, getPageProps },
+  } = await import(
+    path.resolve(`../client/build/pages/${pageRouteName}.bundle.js`)
+  );
 
-    const {
-      default: { default: Layout },
-    } = await import(pageLayoutPath);
-    const cachedPage = fs.readFileSync(
-      path.resolve(`../client/build/cache/${pageRouteName}.html`),
-      'utf-8'
-    );
+  const { props = {}, revalidate = 0 } = getPageProps
+    ? await getPageProps()
+    : {};
 
-    app.get(pageRoute, (req, res) => {
-      const resultPage = cachedPage.replace(
+  app.get(pageRoute, (req, res) => {
+    const resultPage = pageHtml
+      .replace(
+        '<!--mycode-->',
+        renderToString(
+          <Layout>
+            <Component {...props} />
+          </Layout>
+        )
+      )
+      .replace(
         '<!--myscript-->',
         `<script type='module' defer src='${path.join(
           '../client/build/main/index.bundle.js'
         )}'></script>`
+      )
+      .replace(
+        '<!--page-data-->',
+        `<script id="PAGE_DATA" type="application/json">${JSON.stringify(
+          props
+        )}</script>`
       );
 
-      res.set('Cache-Control', 'no-cache');
-      res.send(resultPage);
-    });
+    res.set('Cache-Control', 'no-cache');
+    res.send(resultPage);
+  });
 
-    app.get(`/props${pageRouteName}`, (req, res) => {
+  app.get(scriptPathRegexp, (req, res) => {
+    res.set('Cache-Control', 'no-cache');
+    res.sendFile(path.resolve('../client/build/main/index.bundle.js'));
+  });
+
+  //TODO: Dynamic Props
+  app.get(`/props${pageRouteName}`, (req, res) => {
+    if (revalidate) {
       const { props: cachedProps, createDate } = JSON.parse(
         fs.readFileSync(
           path.resolve(`../client/cache-data/${pageRouteName}.json`)
@@ -69,80 +86,13 @@ myPages.forEach(async (page) => {
           }
         );
 
-        const fullRenderedPage = renderToString(
-          <Layout>
-            <Component {...props} />
-          </Layout>
-        );
-
-        console.log(222, cachedProps);
-        console.log(fullRenderedPage);
-
-        const resultPage = pageHtml
-          .replace('<!--mycode-->', fullRenderedPage)
-          .replace(
-            '<!--page-data-->',
-            `<script id="PAGE_DATA" type="application/json">${JSON.stringify({
-              ...props,
-            })}</script>`
-          );
-
-        fs.writeFileSync(
-          path.resolve(`../client/build/cache/${pageRouteName}.html`),
-          resultPage,
-          {
-            encoding: 'utf-8',
-          }
-        );
         res.json(props);
       } else {
         res.json(cachedProps);
       }
-    });
-  } else {
-    const {
-      default: { default: Layout },
-    } = await import(pageLayoutPath);
-
-    const {
-      default: { default: Component, SSR },
-    } = await import(
-      path.resolve(`../client/build/pages/${pageRouteName}.bundle.js`)
-    );
-
-    const { props = {} } = SSR ? await SSR() : {};
-
-    app.get(pageRoute, (req, res) => {
-      const resultPage = pageHtml
-        .replace(
-          '<!--mycode-->',
-          renderToString(
-            <Layout>
-              <Component {...props} />
-            </Layout>
-          )
-        )
-        .replace(
-          '<!--myscript-->',
-          `<script type='module' defer src='${path.join(
-            '../client/build/main/index.bundle.js'
-          )}'></script>`
-        )
-        .replace(
-          '<!--page-data-->',
-          `<script id="PAGE_DATA" type="application/json">${JSON.stringify(
-            props
-          )}</script>`
-        );
-
-      res.set('Cache-Control', 'no-cache');
-      res.send(resultPage);
-    });
-  }
-
-  app.get(scriptPathRegexp, (req, res) => {
-    res.set('Cache-Control', 'no-cache');
-    res.sendFile(path.resolve('../client/build/main/index.bundle.js'));
+    } else {
+      res.json(props);
+    }
   });
 });
 

@@ -2,20 +2,37 @@ import HTMLWebpackPlugin from 'html-webpack-plugin';
 import webpack from 'webpack';
 import path from 'path';
 import fs from 'fs';
-import { renderToString } from 'react-dom/server';
 import routes from '../../routes.json';
 
 if (fs.existsSync(path.resolve('cache-data'))) {
-  fs.rmdirSync(path.resolve('cache-data'), { recursive: true });
+  fs.rmSync(path.resolve('cache-data'), { recursive: true });
 }
 
 fs.mkdirSync(path.resolve('cache-data'));
 
-const pages = Object.entries(routes);
-const pageHtml = fs.readFileSync(
-  path.resolve('../../public/index.html'),
-  'utf-8'
+const pages = Object.entries(routes).filter(
+  ([_, pageValue]) => 'page' in pageValue
 );
+
+pages.forEach(async ([pageName, pageValue]) => {
+  //@ts-ignore
+  const { getPageProps } = await import(pageValue.page);
+
+  const { props, revalidate = 0 } = await getPageProps();
+
+  if (revalidate) {
+    fs.writeFileSync(
+      path.resolve(`./cache-data/${pageName}.json`),
+      `${JSON.stringify({
+        props,
+        createDate: Date.now(),
+      })}`,
+      {
+        encoding: 'utf-8',
+      }
+    );
+  }
+});
 
 export default (env: {
   mode: 'production' | 'development';
@@ -57,60 +74,10 @@ export default (env: {
   },
 
   plugins: [
-    ...pages.map(([pageName, pageValue]) => {
-      const isCached =
-        'page' in pageValue
-          ? fs.readFileSync(pageValue.page).includes('cached')
-          : false;
-
-      return new HTMLWebpackPlugin({
-        filename: isCached
-          ? path.resolve(`./build/cache/${pageName}.html`)
-          : path.resolve('./build/index.html'),
-        template: path.resolve('../../public/index.html'),
-        inject: false,
-        templateContent: isCached
-          ? async () => {
-              const { default: Layout } = await import(
-                path.resolve('./src/layout.tsx')
-              );
-
-              const { default: Component, cached } = await import(
-                'page' in pageValue ? pageValue.page : ''
-              );
-
-              const { props } = await cached();
-
-              const fullRenderedPage = renderToString(
-                <Layout>
-                  <Component {...props} />
-                </Layout>
-              );
-
-              const resultPage = pageHtml
-                .replace('<!--mycode-->', fullRenderedPage)
-                .replace(
-                  '<!--page-data-->',
-                  `<script id="PAGE_DATA" type="application/json">${JSON.stringify(
-                    props
-                  )}</script>`
-                );
-
-              fs.writeFileSync(
-                path.resolve(`./cache-data/${pageName}.json`),
-                `${JSON.stringify({
-                  props,
-                  createDate: Date.now(),
-                })}`,
-                {
-                  encoding: 'utf-8',
-                }
-              );
-
-              return resultPage;
-            }
-          : pageHtml,
-      });
+    new HTMLWebpackPlugin({
+      filename: path.resolve('./build/index.html'),
+      template: path.resolve('../../public/index.html'),
+      inject: false,
     }),
 
     new webpack.ProvidePlugin({

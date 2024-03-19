@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React from 'react';
 
 interface ContactsProps {
@@ -10,6 +11,10 @@ interface ContactsProps {
 }
 
 export default function Contacts({ posts }: ContactsProps) {
+  if (!posts) {
+    return null;
+  }
+
   return (
     <div>
       <h1 style={{ color: 'green' }}>You are the best my friend</h1>
@@ -27,12 +32,12 @@ export default function Contacts({ posts }: ContactsProps) {
   );
 }
 
-export const SSR = async () => {
-  const posts = await fetch('https://jsonplaceholder.typicode.com/posts');
+export const getPageProps = async () => {
+  const posts = await axios.get('https://jsonplaceholder.typicode.com/posts');
 
   return {
     props: {
-      posts: await posts.json(),
+      posts: posts.data,
     },
   };
 };

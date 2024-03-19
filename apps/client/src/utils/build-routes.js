@@ -1,9 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 const allowedFileNameInPageDir = ['index.tsx', 'layout.tsx', 'layout'];
 
-(function () {
+(async function () {
   const clientPageStructure = fs.readdirSync(path.resolve('./src'));
 
   const routes = {};

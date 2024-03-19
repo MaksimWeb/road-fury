@@ -40,6 +40,7 @@
   "dependencies": {
     "@road-fury/client": "^1.0.0",
     "@road-fury/server": "^1.0.0",
+    "axios": "^1.6.8",
     "node-fetch": "^3.3.2"
   }
 }
